@@ -1,7 +1,12 @@
-.PHONY: build run
+.PHONY: nativeBuild build run
+
+export IMAGE_NAME=neemiasjnr/kotlin-playground
+
+nativeBuild:
+	./gradlew clean build -Dquarkus.package.type=native -Dquarkus.native.container-build=true
 
 build:
-	./gradlew clean jar
+	docker build -t ${IMAGE_NAME} .
 
 run:
-	java -jar build/libs/kotlin-playground.jar
+	docker run -i --rm -p 8080:8080 ${IMAGE_NAME}

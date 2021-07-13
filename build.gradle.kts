@@ -1,51 +1,57 @@
-import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
-    application
-    kotlin("jvm") version "1.4.0"
-}
-
-application {
-    mainClassName = "com.projects.kotlinplayground.ApplicationKt"
+    kotlin("jvm")
+    id("org.jetbrains.kotlin.plugin.allopen")
+    id("io.quarkus")
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
+group = "com.github.neemiasjnr"
+version = "1.0.0-SNAPSHOT"
+val quarkusVersion: String by project
+
 dependencies {
-    // does not work
-    implementation(platform("com.google.cloud:libraries-bom:20.7.0"))
-    implementation("com.google.cloud:google-cloud-pubsub")
+    implementation(kotlin("stdlib-jdk8"))
+    implementation(platform("io.quarkus:quarkus-bom:$quarkusVersion"))
+    implementation("io.quarkus:quarkus-resteasy:$quarkusVersion")
+    implementation("io.quarkus:quarkus-resteasy-jackson:$quarkusVersion")
+    implementation("io.quarkus:quarkus-kotlin:$quarkusVersion")
 
-    // also does not work
-    // implementation("com.google.cloud:google-cloud-pubsub:1.113.5")
-
-    // works
-    // implementation("com.google.cloud:google-cloud-pubsub:1.101.0")
-}
-
-tasks {
-    withType<Jar> {
-        archiveBaseName.set("kotlin-playground")
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-        manifest {
-            attributes["Main-Class"] = "com.projects.kotlinplayground.ApplicationKt"
-        }
-        from(configurations.compileClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-        exclude("local.properties")
-    }
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
-        kotlinOptions.freeCompilerArgs = listOf("-Xjsr305=strict")
-    }
+    testImplementation("io.quarkus:quarkus-junit5:$quarkusVersion")
+    testImplementation("io.rest-assured:rest-assured:$quarkusVersion")
 }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
-    sourceSets["main"].java.srcDir("src")
-    sourceSets["test"].java.srcDir("test")
+}
+
+allOpen {
+    annotation("javax.ws.rs.Path")
+    annotation("javax.enterprise.context.ApplicationScoped")
+    annotation("io.quarkus.test.junit.QuarkusTest")
+}
+
+sourceSets {
+    main {
+        java.srcDir("src")
+        resources.srcDir("resources")
+    }
+    test {
+        java.srcDir("test")
+        resources.srcDir("testresources")
+    }
+}
+
+tasks {
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
+        kotlinOptions.javaParameters = true
+    }
 }
