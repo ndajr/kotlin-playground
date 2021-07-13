@@ -3,7 +3,7 @@ Just having some fun with Kotlin and [Quarkus](https://quarkus.io/) 😎.
 
 #### Running locally
 ```bash
-./gradle quarkusDev
+./gradlew quarkusDev
 ```
 
 #### Building for production
