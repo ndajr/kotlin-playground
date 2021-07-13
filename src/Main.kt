@@ -1,15 +1,19 @@
 package com.github.neemiasjnr.kotlinplayground
 
-import javax.ws.rs.GET
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.core.MediaType.TEXT_PLAIN
+import javax.inject.Inject
+import javax.ws.rs.*
+import javax.ws.rs.core.MediaType
+import com.github.neemiasjnr.kotlinplayground.greeting.GreetingService
+import com.github.neemiasjnr.kotlinplayground.greeting.GreetingResponse
 
 @Path("/hello")
-class GreetingResource {
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+class Main {
+    @Inject
+    lateinit var greetingService: GreetingService
+
     @GET
-    @Produces(TEXT_PLAIN)
-    fun hello(): String {
-        return "hello"
-    }
+    @Path("{name}")
+    fun hello(@PathParam("name") name: String): GreetingResponse = greetingService.greeting(name)
 }
